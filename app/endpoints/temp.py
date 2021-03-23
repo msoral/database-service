@@ -1,7 +1,8 @@
-from flask import Blueprint, current_app
-bp_temp = Blueprint("template", __name__, url_prefix="/template")
+from flask import Blueprint, jsonify
+bp_temp = Blueprint("template", __name__)
 
 
-@bp_temp.route("/")
+@bp_temp.route("/test")
 def index():
-    return
+    output = {"msg": "Test output of index"}
+    return jsonify(output), 200
