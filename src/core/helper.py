@@ -1,11 +1,16 @@
-from src.database import AssetMetadata
+from sqlalchemy import and_
 
 
-def _fetch_by_id(uid, exchange):
-    # TODO: Select schema before querying assetmetadata.
-    return AssetMetadata.query().filter_by(id=uid)
+def fetch_ticker_from_id(asset_id: int) -> str:
+    pass
 
 
-def get_symbol_by_id(uid, exchange):
-    asset = AssetMetadata.query.get(uid)
-    return str(asset.ticker)
+def filter_with_date(db_object, query, start_date, end_date):
+    if (start_date and end_date) is None:
+        return query
+    elif (start_date and end_date) is not None:
+        return query.filter(
+            and_(db_object.date >= start_date, db_object.date <= end_date)
+        ).all()
+    else:
+        print("ERROR! Please use start_date and end_date together.")

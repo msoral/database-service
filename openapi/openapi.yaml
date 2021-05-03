@@ -1,16 +1,23 @@
 openapi: 3.0.3
 info:
-  title: Database Service
+  x-api-id: 4ec2c107-2a83-42a8-9c31-f09568043382
+  title: Database Service API
   description: >
-    Use this service to interact with the database. All get/delete requests parameters are query parameters. All post/put request parameters are sent in the body of the request in json format.
+    This api follows the guidelines specified in this [link](https://opensource.zalando.com/restful-api-guidelines/#).
+    Use this service to interact with the database. All get/delete requests parameters are query parameters.
+    All post/put request parameters are sent in the body of the request in json format.
+    `start_date` and `end_date` parameters expect datetime values that comply with ISO 8601.
   version: "1.0.0"
   contact:
     email: m.oral@blueflow.ai
+
+
 servers:
-  - url: localhost://8080/api/v1/binance
-    description: Connects to the binance database
-  - url: localhost://8080/api/v1/interactive_brokers
-    description: Connects to the interactive brokers database
+  - url: http://localhost:8080
+    description: For testing purposes
+  - url: http://database_service:44890
+    description: Use this when deployed with docker compose
+
 tags:
   - name: asset
     description: All info about assets
@@ -21,14 +28,17 @@ tags:
 
 # Paths supported by the server application
 paths:
-  /assets:
+  /{exchange}/assets:
+    parameters:
+      - $ref: "#/components/parameters/exchange"
     post:
       tags:
         - asset
       operationId: insert_asset
-      summary: Create a new asset
+      summary: Create a new asset, provide as many social links as possible.
+      description: >
+        Please do not send asset_id, it will be **ignored** and generated automatically.
       requestBody:
-        description: Placeholder description
         required: true
         content:
           application/json:
@@ -36,7 +46,18 @@ paths:
              $ref: "#/components/schemas/AssetMetadata"
       responses:
         201:
-          $ref: "#/components/responses/Created"
+          description: Created, id is in response
+          content:
+            text/plain:
+              schema:
+                type: integer
+                format: int64
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeneralError"
       x-openapi-router-controller: src.api.controllers.assets
 
 
@@ -44,17 +65,21 @@ paths:
       tags:
         - asset
       operationId: fetch_asset
-      summary: List assets of an exchange
+      summary: Returns a list of asset metadata.
       responses:
         200:
           description: "OK"
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Assets"
+                type: array
+                items:
+                  $ref: "#/components/schemas/AssetMetadata"
       x-openapi-router-controller: src.api.controllers.assets
 
-  /assets/price:
+  /{exchange}/assets/price:
+    parameters:
+      - $ref: "#/components/parameters/exchange"
     get:
       tags:
         - asset
@@ -80,11 +105,10 @@ paths:
       tags:
         - asset
       operationId: insert_price
-      summary: Create a new asset object
-      description: >
-        **Warning**: This endpoint creates an entry in the database.
+      summary: Create new price data entry for an asset.
       requestBody:
-        description: Placeholder description
+        description: >
+          Please do not send asset_id, it will be **ignored** and generated automatically.
         required: true
         content:
           application/json:
@@ -92,21 +116,14 @@ paths:
              $ref: "#/components/schemas/Asset"
       responses:
         201:
-          description: Created
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  timestamp:
-                    type: number
-                    format: float
-                    description: Timestamp of the price data in milliseconds.
+          $ref: "#/components/responses/Created"
         400:
           description: Make sure all values are entered with correct dtypes.
       x-openapi-router-controller: src.api.controllers.assets
 
-  /assets/indicators:
+  /{exchange}/assets/indicators:
+    parameters:
+      - $ref: "#/components/parameters/exchange"
     get:
       tags:
         - asset
@@ -122,13 +139,21 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties:
-                  $ref: "#/components/schemas/AssetIndicators"
+                properties:
+                  asset_id:
+                    type: number
+                  indicators:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/AssetIndicators"
+
         404:
           description: Did not find the specified asset id.
       x-openapi-router-controller: src.api.controllers.assets
 
-  /orders:
+  /{exchange}/orders:
+    parameters:
+      - $ref: "#/components/parameters/exchange"
     post:
       tags:
         - order
@@ -142,16 +167,7 @@ paths:
               $ref: "#/components/schemas/Order"
       responses:
         201:
-          description: Created new order entry
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id:
-                    type: string
-                    format: uuid
-                    description: Autogenerated uuid for the order
+          $ref: '#/components/responses/CreatedWithId'
         400:
           description: Bad request body
       x-openapi-router-controller: src.api.controllers.orders
@@ -171,10 +187,18 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Orders"
+                type: object
+                properties:
+                  ticker:
+                    type: string
+                    example: TSLA
+                additionalProperties:
+                  $ref: "#/components/schemas/Order"
       x-openapi-router-controller: src.api.controllers.orders
 
-  /orders/by_id:
+  /{exchange}/orders/by_id:
+    parameters:
+      - $ref: "#/components/parameters/exchange"
     get:
       tags:
         - order
@@ -191,34 +215,39 @@ paths:
                 $ref: "#/components/schemas/Order"
       x-openapi-router-controller: src.api.controllers.orders
 
-  /wallet:
+  /{exchange}/wallet:
+    parameters:
+      - $ref: "#/components/parameters/exchange"
+      - $ref: "#/components/parameters/asset_id_optional"
+      - $ref: "#/components/parameters/start_date"
+      - $ref: "#/components/parameters/end_date"
     get:
       tags:
         - wallet
       operationId: fetch_holdings
-      summary: Get current portfolio holdings
+      summary: Get portfolio holdings
+      description: >
+        If no parameter is specified returns the current portfolio holdings. Otherwise returns portfolio history with given dates
+        and/or for a given asset. **Note: Multiple asset ids are not supported at this time.**
       responses:
         200:
-          $ref: "#/components/responses/Wallet"
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Wallet"
       x-openapi-router-controller: src.api.controllers.wallet
 
-  /wallet/funds:
+  /{exchange}/wallet/cost:
+    parameters:
+      - $ref: "#/components/parameters/exchange"
+      - $ref: "#/components/parameters/asset_id_optional"
     get:
       tags:
         - wallet
-      operationId: fetch_funds
-      summary: Get amount of available funds
-      responses:
-        200:
-          $ref: "#/components/responses/SingleNumber"
-      x-openapi-router-controller: src.api.controllers.wallet
-
-  /wallet/total:
-    get:
-      tags:
-        - wallet
-      operationId: fetch_total
-      summary: Get dollar equavalent of current holdings.
+      operationId: fetch_cost
+      summary: Get average cost
+      description: Returns the average cost of an asset. If no asset id is provided, returns the average cost of the wallet.
       responses:
         200:
           $ref: "#/components/responses/SingleNumber"
@@ -226,20 +255,42 @@ paths:
 
 components:
   parameters:
+    exchange:
+      name: exchange
+      in: path
+      description: select the exchange
+      required: true
+      schema:
+        type: string
+        enum:
+          - binance
+          - interactive_brokers
+    
     order_id:
       name: order id
       in: query
       required: true
       schema:
         type: string
+        format: uuid
+
     asset_id:
-      name: id
+      name: asset_id
       in: query
       description: Use /assets endpoint to get the id of the asset.
       required: True
       schema:
         type: integer
         format: int64
+
+    asset_id_optional:
+      name: asset_id
+      in: query
+      description: Use /assets endpoint to get the id of the asset.
+      schema:
+        type: integer
+        format: int64
+
     start_date:
       name: start_date
       in: query
@@ -248,6 +299,7 @@ components:
         format: date
       description: >
         Must be used together with `end_date`.
+
     end_date:
       name: end_date
       in: query
@@ -258,10 +310,6 @@ components:
         Must be used together with `start_date`.
 
   schemas:
-    Assets:
-      type: array
-      items:
-        $ref: "#/components/schemas/AssetMetadata"
     AssetMetadata:
       type: object
       properties:
@@ -274,7 +322,7 @@ components:
             string
         website:
           type: string
-        social_links:
+        links:
           type: object
           additionalProperties:
             type: string
@@ -282,9 +330,10 @@ components:
             twitter: ""
             reddit: ""
             facebook: ""
+
     Asset:
       type: object
-      description: Use `GET /assets` to find asset id.
+      description: Use `GET {exchange}/assets` to find asset id.
       properties:
         timestamp:
           type: number
@@ -318,6 +367,7 @@ components:
           type: number
           format: float
           example: 1,081,744,124,778
+
     AssetIndicators:
       type: object
       properties:
@@ -325,21 +375,32 @@ components:
           type: number
           format: float
           example: 1616414075.621394
-        assetId:
-          type: integer
-          format: int64
-          example: 1 # Bitcoin for binance exchange
       additionalProperties:
         type: number
         format: float
-    Orders:
+
+    GeneralError:
       type: object
       properties:
-        ticker:
+        code:
+          type: integer
+          format: int32
+          example: 1001
+        message:
           type: string
-          example: TSLA
-      additionalProperties:
-        $ref: "#/components/schemas/Order"
+          example: Unexpected keywords in request body
+
+    Id:
+      title: id
+      type: object
+      example:
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+      properties:
+        id:
+          format: uuid
+          title: id
+          type: string
+
     Order:
       type: object
       properties:
@@ -369,34 +430,60 @@ components:
         optional_parameters:
           type: object
           additionalProperties: true
+
     Wallet:
+      title: Wallet
       type: object
-      properties:
-        timestamp:
-          type: number
-          format: float
+      example:
+        datetime: 2000-01-23T04:56:07.000+00:00
         assets:
-          type: array
+        - quantity: 0.8008281904610115
+          cost: 6.027456183070403
+          name: name
+        - quantity: 0.8008281904610115
+          cost: 6.027456183070403
+          name: name
+      properties:
+        datetime:
+          format: date-time
+          title: datetime
+          type: string
+        assets:
           items:
-            type: object
-            properties:
-              ticker:
-                type: string
-              quantity:
-                type: number
-                format: double
+            $ref: '#/components/schemas/WalletAssets'
+          title: assets
+          type: array
+
+    WalletAssets:
+      title: WalletAssets
+      type: object
+      example:
+        quantity: 0.8008281904610115
+        cost: 6.027456183070403
+        name: name
+      properties:
+        name:
+          title: name
+          type: string
+        quantity:
+          format: double
+          title: quantity
+          type: number
+        cost:
+          format: double
+          title: cost
+          type: number
 
   responses:
     Created:
-      description: Created successfully
+      description: Created successfully.
 
-    Wallet:
-      description: All quantities are in their respective asset
+    CreatedWithId:
+      description: Created.
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Wallet"
-
+            $ref: "#/components/schemas/Id"
 
     SingleNumber:
       description: Requested data is in USD
@@ -408,8 +495,8 @@ components:
             example: 18203.50
 
     NotFound:
-      description: The object you were was not found
-
-
+      description: The object you were was not found.
+    FallbackError:
+      description: An unexpected error occurred.
 
 

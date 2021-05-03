@@ -1,6 +1,7 @@
-connexion >= 2.6.0
-Flask-SQLAlchemy
-Flask-Migrate >= 2.7.0
-swagger-ui-bundle >= 0.0.2
-python_dateutil == 2.6.0
-setuptools >= 21.0.0
+fastapi[all]
+uvicorn
+SQLAlchemy
+Alembic
+async-exit-stack
+python-dotenv
+psycopg2

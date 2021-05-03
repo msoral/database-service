@@ -70,3 +70,5 @@ target/
 
 src/instance/
 /config.yaml
+.env
+/src

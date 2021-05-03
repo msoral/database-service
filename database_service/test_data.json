@@ -1,0 +1,7 @@
+{
+  "name": "Bitcoin",
+  "ticker": "btc",
+  "website": "https://bitcoin.org/en/",
+  "links": {"reddit": "https://www.reddit.com/r/Bitcoin/",
+            "twitter": "https://twitter.com/btc", "github": "https://github.com/bitcoin"}
+}
