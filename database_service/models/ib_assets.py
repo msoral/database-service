@@ -11,13 +11,8 @@ class Tesla(InteractiveBrokerAsset):
 
 
 # This will be filled as other assets are decided.
-
-
-class StockFactory:
-    ticker_mapper = {
+ticker_mapper = {
         "tsla": Tesla,
     }
 
-    @classmethod
-    def create_asset(cls, asset_ticker, asset_dict):
-        return cls.ticker_mapper[asset_ticker](**asset_dict)
+

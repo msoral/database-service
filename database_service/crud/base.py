@@ -1,8 +1,10 @@
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
+from datetime import datetime
 
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from sqlalchemy import and_
 
 from ..db.base_class import Base
 
@@ -30,6 +32,20 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         self, db: Session, *, skip: int = 0, limit: int = 100
     ) -> List[ModelType]:
         return db.query(self.model).offset(skip).limit(limit).all()
+
+    def get_by_date(
+        self, db: Session, ticker: str, *, start_date: datetime, end_date: datetime
+    ) -> List[ModelType]:
+        query = db.query(self.model).order_by(self.model.date).all()
+
+        if (start_date and end_date) is None:
+            return query
+        elif (start_date and end_date) is not None:
+            return query.filter(
+                and_(self.model.date >= start_date, self.model.date <= end_date)
+            ).all()
+        else:
+            print("ERROR! Please use start_date and end_date together.")
 
     def create(self, db: Session, *, obj_in: CreateSchemaType) -> ModelType:
         obj_in_data = jsonable_encoder(obj_in)
