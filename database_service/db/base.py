@@ -5,9 +5,8 @@ from database_service.models import (  # noqa
     BinanceMetadata,
     BinanceOrder,
     BinanceWallet,
-    CoinFactory,
     IBMetadata,
     IBOrder,
     IBWallet,
-    StockFactory,
+    ExchangeFactory
 )

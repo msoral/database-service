@@ -18,15 +18,15 @@ class AssetMetadata(Base):
     website = Column(String)
     links = Column(JSON)
 
-    @declared_attr
-    def wallet_id(self):
-        return relationship("Wallet")
+    # @declared_attr
+    # def wallet_id(self):
+    #     return relationship("Wallet", backref="asset_id")
 
 
 class Asset(Base):
     __abstract__ = True
 
-    date = Column(DateTime, primary_key=True)
+    timestamp = Column(Float, primary_key=True)
     open = Column(Float)
     close = Column(Float)
     high = Column(Float)
@@ -39,7 +39,7 @@ class Order(Base):
     __abstract__ = True
 
     order_id = Column("uuid", UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    date = Column("date", DateTime)
+    timestamp = Column("date", Float)
     symbol = Column("symbol", String(10))
     status = Column("status", String(16))
     side = Column("side", String(4))
@@ -59,10 +59,10 @@ class Wallet(Base):
     __abstract__ = True
     id = Column(Integer, primary_key=True)
     date = Column(DateTime)
-    user = Column(String(25))
+    ticker = Column(String)
     quantity = Column(Float)
     cost = Column(Float)
 
-    @declared_attr
-    def asset_id(self):
-        return Column(Integer, ForeignKey("AssetMetadata.id"), nullable=False)
+    # @declared_attr
+    # def asset_id(self):
+    #     return Column(Integer, ForeignKey("AssetMetadata.id"), nullable=False)

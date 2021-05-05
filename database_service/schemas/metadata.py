@@ -19,7 +19,6 @@ class MetadataCreate(MetadataBase):
 
 
 class MetadataDB(MetadataRead):
-    pass
 
     class Config:
         orm_mode = True

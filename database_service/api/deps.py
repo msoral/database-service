@@ -1,4 +1,4 @@
-from typing import Generator
+from typing import Generator, Callable
 
 from fastapi import Depends
 
@@ -23,7 +23,7 @@ class ExchangeMapper:
     def __init__(self, table_string: TableType):
         self.table_string = table_string
 
-    def __call__(self, exchange: Exchanges = Depends(get_exchange)):
+    def __call__(self, exchange: Exchanges = Depends(get_exchange)) -> Callable:
         return ExchangeFactory.select_class(exchange, self.table_string)
 
 

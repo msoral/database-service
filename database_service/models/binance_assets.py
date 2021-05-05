@@ -78,8 +78,7 @@ class Litecoin(BinanceAsset):
     __tablename__ = "ltc"
 
 
-class CoinFactory:
-    ticker_mapper = {
+ticker_mapper = {
         "btc": Bitcoin,
         "eth": Ethereum,
         "xrp": XRP,
@@ -100,6 +99,3 @@ class CoinFactory:
         "ltc": Litecoin,
     }
 
-    @classmethod
-    def create_asset(cls, coin_ticker, coin_dict) -> BinanceAsset:
-        return cls.ticker_mapper[coin_ticker](**coin_dict)

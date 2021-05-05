@@ -1,11 +1,10 @@
-from typing import Dict, List
-
+from datetime import datetime
 from pydantic import BaseModel
 
 
-class Asset(BaseModel):
+# Shared properties
+class AssetBase(BaseModel):
     timestamp: float
-    asset_id: int
     open: float
     close: float
     high: float
@@ -13,15 +12,21 @@ class Asset(BaseModel):
     volume: float
     market_cap: float
 
+
+# Properties to return to client
+class AssetRead(AssetBase):
+    pass
+
+
+# Properties needed for item creation
+class AssetCreate(AssetBase):
+    ticker: str
+
+
+# Properties stored in DB
+class AssetDB(AssetBase):
+    datetime: datetime
+
     class Config:
         orm_mode = True
 
-
-class AssetIndicator(BaseModel):
-    timestamp: float
-    indicators: Dict[str, float]
-
-
-class AssetIndicators(BaseModel):
-    asset_id: int
-    indicator_list: List[AssetIndicator]
