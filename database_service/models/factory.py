@@ -1,9 +1,8 @@
-from database_service.common.enums import TableType
+from database_service.common.enums import Exchanges, TableType
 
 from .base import *
 from .binance_assets import ticker_mapper as binance
 from .ib_assets import ticker_mapper as ib
-from database_service.common.enums import Exchanges
 
 
 class AssetFactory:

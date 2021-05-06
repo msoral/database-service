@@ -4,47 +4,47 @@ from typing import List
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from database_service import crud, schemas
 from database_service.api import deps
 from database_service.common import utils
+from database_service.crud import CRUDAsset, CRUDMetadata
+from database_service.schemas import asset, metadata
 
 router = APIRouter(prefix="/assets", tags=["assets"])
 
 
-@router.get("/", response_model=List[schemas.MetadataRead])
+@router.get("/", response_model=List[metadata.MetadataRead])
 def read_asset_metadata(
     sess: Session = Depends(deps.get_session),
     db_model: deps.metadata = Depends(),
 ):
     """Returns metadata of all assets"""
-    return crud.CRUDMetadata(db_model).get_multi(sess)
+    return CRUDMetadata(db_model).get_multi(sess)
 
 
-@router.get("/{asset_id}", response_model=schemas.MetadataRead)
+@router.get("/{ticker}", response_model=metadata.MetadataRead)
 def read_asset_metadata(
     ticker: str,
     sess: Session = Depends(deps.get_session),
     db_model: deps.metadata = Depends(),
 ):
     """Returns metadata of the asset with given id"""
-    return crud.CRUDMetadata(db_model).get(sess, ticker)
+    return CRUDMetadata(db_model).get(sess, ticker)
 
 
-@router.post("/", status_code=201, response_model=schemas.MetadataDB)
+@router.post("/", status_code=201, response_model=metadata.MetadataDB)
 def create_asset_metadata(
     *,
-    metadata_in: schemas.MetadataCreate,
+    metadata_in: metadata.MetadataCreate,
     sess: Session = Depends(deps.get_session),
     db_model: deps.metadata = Depends()
 ):
     """
     Create new metadata
     """
-    metadata = crud.CRUDMetadata(db_model).create(sess, obj_in=metadata_in)
-    return metadata
+    return CRUDMetadata(db_model).create(sess, obj_in=metadata_in)
 
 
-@router.get("/price", response_model=List[schemas.AssetRead])
+@router.get("/price", response_model=List[asset.AssetRead])
 def read_asset_price(
     ticker: str,
     *,
@@ -53,15 +53,16 @@ def read_asset_price(
     start_date: datetime = utils.get_last_month(),
     end_date: datetime = datetime.utcnow()
 ):
-    return crud.CRUDAsset(db_model).get_by_date(
-        sess, ticker, start_date=start_date, end_date=end_date
+    db_model = db_model(ticker)
+    return CRUDAsset(db_model).get_by_date(
+        sess, start_date=start_date, end_date=end_date
     )
 
 
-@router.post("/price", response_model=schemas.AssetRead, status_code=201)
+@router.post("/price", response_model=asset.AssetRead, status_code=201)
 def create_asset_price(
         *,
-        asset_in: schemas.AssetCreate,
+        asset_in: asset.AssetCreate,
         sess: Session = Depends(deps.get_session),
         db_model: deps.asset = Depends(),
 ):
@@ -69,5 +70,4 @@ def create_asset_price(
     db_model = db_model(asset_in.ticker)
     print("final model:")
     print(db_model)
-    asset = crud.CRUDAsset(db_model).create(sess, obj_in=asset_in)
-    return asset
+    return CRUDAsset(db_model).create(sess, obj_in=asset_in)
