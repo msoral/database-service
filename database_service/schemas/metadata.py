@@ -11,7 +11,7 @@ class MetadataBase(BaseModel):
 
 
 class MetadataRead(MetadataBase):
-    id: int
+    pass
 
 
 class MetadataCreate(MetadataBase):

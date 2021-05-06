@@ -1,4 +1,3 @@
-from sqlalchemy import and_
 
 from src import db
 from src.database import BinanceWallet, IBWallet

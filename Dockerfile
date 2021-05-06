@@ -1,11 +1,6 @@
-FROM python:3.7.9-buster
-RUN mkdir -p /usr/src/app
-WORKDIR /usr/src/app
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.7
 
-COPY . .
-RUN apt update
+COPY ./database_service /app
+COPY ./requirements.txt .
+
 RUN pip install --no-cache-dir -r requirements.txt
-
-EXPOSE 8080
-
-CMD [ "python -m", "database_service" ]
