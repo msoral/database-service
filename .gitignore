@@ -68,7 +68,4 @@ target/
 # Pycharm settings
 .idea
 
-src/instance/
-/config.yaml
 .env
-/src
