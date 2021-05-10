@@ -1,5 +1,5 @@
 from datetime import date
-import logging
+from typing import List
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
@@ -12,7 +12,7 @@ from database_service.schemas import wallet
 router = APIRouter(prefix="/wallet", tags=["wallet"])
 
 
-@router.get("/holding", response_model=wallet.WalletUpdate)
+@router.get("/", response_model=wallet.WalletUpdate)
 def read_holding(
         *,
         ticker: str,
@@ -28,7 +28,7 @@ def read_holding(
     return CRUDWallet(db_model).get_holding(sess, ticker, start_date, end_date)
 
 
-@router.get("/", response_model=wallet.WalletUpdate)
+@router.get("/all", response_model=List[wallet.WalletUpdate])
 def read_portfolio(
         *,
         sess: Session = Depends(deps.get_session),

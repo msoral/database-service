@@ -36,7 +36,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     def get_by_date(
             self,
             db: Union[Session, Query],
-            *,
+            *args,
             start_date: Union[datetime, date],
             end_date: Union[datetime, date]
     ) -> List[ModelType]:
