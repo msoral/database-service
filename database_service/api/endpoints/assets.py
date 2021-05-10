@@ -33,7 +33,7 @@ def read_asset_metadata(
 
 @router.post("/", status_code=201, response_model=metadata.MetadataDB)
 def create_asset_metadata(
-    *,
+    *args,
     metadata_in: metadata.MetadataCreate,
     sess: Session = Depends(deps.get_session),
     db_model: deps.metadata = Depends()
