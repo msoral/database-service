@@ -11,7 +11,6 @@ class AssetBase(BaseModel):
     high: float
     low: float
     volume: float
-    market_cap: float
 
 
 # Properties to return to client
@@ -26,8 +25,6 @@ class AssetCreate(AssetBase):
 
 # Properties stored in DB
 class AssetDB(AssetBase):
-    datetime: datetime
 
     class Config:
         orm_mode = True
-

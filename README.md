@@ -31,6 +31,13 @@ This service is for communicating with the database. This API is implemented usi
 
 ## Setup
 Install PostgreSQL and run the sql code in `init.sql` in psql terminal to create a database and schemas.
+Following environment variables are required for this project to run:
+
+    POSTGRES_SERVER = hostIP:port 
+    POSTGRES_USER = "myuser"
+    POSTGRES_PASSWORD = "mypass" 
+    POSTGRES_DB = "mydatabasename"
+
 ## Requirements
 This project requires Python 3.7+ to run. Using a virtual environment is recommended.
 ``` 

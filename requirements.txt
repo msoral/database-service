@@ -5,3 +5,4 @@ Alembic
 async-exit-stack
 python-dotenv
 psycopg2
+loguru

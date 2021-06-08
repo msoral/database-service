@@ -9,8 +9,8 @@ init_db()
 app = FastAPI(
     title="Database Service",
     openapi_url="/api/v1/openapi.json",
-    description="This api follows the guidelines specified in this [link](https://opensource.zalando.com/restful-api-guidelines/#).\
-    Use this service to interact with the database. All get/delete requests parameters are query parameters.\
+    description="Use this service to interact with the database. \
+    All get/delete requests parameters are query parameters.\
     All post/put request parameters are sent in the body of the request in json format.\
     `start_date` and `end_date` parameters expect datetime values that comply with ISO 8601.",
     version="1.0.0",

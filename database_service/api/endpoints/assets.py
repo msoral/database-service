@@ -3,6 +3,7 @@ from typing import List
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+from loguru import logger
 
 from database_service.api import deps
 from database_service.common import utils
@@ -68,6 +69,5 @@ def create_asset_price(
 ):
     # db_model for assets return AssetFactory.create_asset function, so it needs to be called to return an asset class.
     db_model = db_model(asset_in.ticker)
-    print("final model:")
-    print(db_model)
+    logger.info(f"final model: {db_model}")
     return CRUDAsset(db_model).create(sess, obj_in=asset_in)

@@ -52,7 +52,7 @@ def read_portfolio(
     Returns historic portfolio
 
     """
-    return CRUDWallet(db_model).get_portfolio_history(sess,start_date=start_date, end_date=end_date)
+    return CRUDWallet(db_model).get_portfolio_history(sess, start_date=start_date, end_date=end_date)
 
 
 @router.post("/", response_model=wallet.WalletCreate)
@@ -63,21 +63,3 @@ def create_holding(
         wallet_in: wallet.WalletCreate
 ):
     return CRUDWallet(db_model).create(sess, obj_in=wallet_in)
-
-
-@router.put("/", response_model=wallet.WalletUpdate)
-def update_holding(
-        *,
-        sess: Session = Depends(deps.get_session),
-        db_model: deps.order = Depends(),
-        ticker: str,
-        date_: date,
-        wallet_in: wallet.WalletCreate
-):
-    wallet_ = CRUDWallet.get_holding(sess, ticker, date_, date_)
-    prev_quantity = wallet_.quantity
-    prev_cost = wallet_.cost
-    total_quantity = wallet_in.quantity + prev_quantity
-    wallet_in.cost = (prev_quantity*prev_cost + wallet_in.cost * wallet_in.quantity)/total_quantity
-    wallet_in.quantity = total_quantity
-    return CRUDWallet(db_model).update(sess, obj_in=wallet_in)

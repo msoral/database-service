@@ -1,3 +1,5 @@
+from loguru import logger
+
 from database_service.common.enums import Exchanges, TableType
 
 from .base import *
@@ -34,7 +36,7 @@ class ExchangeFactory:
 
     @classmethod
     def select_class(cls, exchange: Exchanges, base_class_string: TableType):
-        print("Factory is working...")
+        logger.info("Factory is working...")
         base_class = cls.class_map[base_class_string]
         assert issubclass(base_class, Base)
         subclass = None
@@ -48,8 +50,7 @@ class ExchangeFactory:
                     asset_factory = AssetFactory(ticker_mapper=ib)
                 subclass = asset_factory.create_asset_class
                 assert callable(subclass)
-            print("------------------Subclass------------------")
-            print(subclass)
+            logger.debug(f"Subclass: {subclass}")
             if subclass:
                 return subclass
         if subclass is None:
